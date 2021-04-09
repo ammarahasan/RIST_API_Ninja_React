@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Raleway:wght@100&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css" />
+    <title>Index</title>
+  </head>
+
+  <body>
+    <h1 class="title">Ninja - a ninja REST API</h1>
+    <div id="homepage">
+      <h1>Hire a ninja in your area</h1>
+      <div id="ninjas"></div>
+    </div>
+
+    <script src="./babel.min.js"></script>
+    <script src="./react.production.min.js"></script>
+    <script src="./react-dom.production.min.js"></script>
+
+    <!-- create react component -->
+    <script type="text/babel">
+      class Ninja extends React.Component {
+        constructor(props) {
+          super(props);
+          this.state = {
+            ninjas: [],
+            latitude: 0,
+            longitude: 0,
+          };
+        }
+
+        onChangeHandler = (event) => {
+          let nam = event.target.name;
+          let val = event.target.value;
+          this.setState({ [nam]: val });
+        };
+
+        handleSubmit = (e) => {
+          e.preventDefault();
+          // alert(this.state.longitude + " " + this.state.latitude);
+
+          fetch(
+            "/api/ninjas?lng=" +
+              this.state.longitude +
+              "&lat=" +
+              this.state.latitude
+          )
+            .then(function (data) {
+              return data.json();
+            })
+            .then((json) => {
+              // console.log("json: " + json);
+              this.setState({
+                ninjas: json,
+              });
+            });
+        };
+
+        render() {
+          console.log("render");
+          return (
+            <div id="ninja-container">
+              <form id="search" onSubmit={this.handleSubmit}>
+                <label>Enter Your Latitude {this.state.latitude}</label>
+                <input
+                  type="text"
+                  name="latitude"
+                  placeholder="Latitude"
+                  required
+                  onChange={this.onChangeHandler}
+                />
+                <label>Enter Your Longitude {this.state.longitude}</label>
+                <input
+                  type="text"
+                  name="longitude"
+                  placeholder="Longitude"
+                  required
+                  onChange={this.onChangeHandler}
+                />
+                <input type="submit" value="Find Ninjas" />
+              </form>
+
+              <ul>
+                {this.state.ninjas.map((ninja) => (
+                  <li key={ninja.id}>
+                    <span className={ninja.available}></span>
+                    <span className="name">{ninja.name}</span>
+                    <span className="rank">{ninja.rank}</span>
+                    <span className="dist">
+                      {Math.floor(ninja.dist.calculated / 1000)} Km
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        }
+      }
+
+      ReactDOM.render(<Ninja />, document.getElementById("ninjas"));
+    </script>
+  </body>
+</html>
